@@ -1,0 +1,51 @@
+customer_id,full_name,business_name,plan,tenure_months,contact_channel,language,city,email,phone,avg_monthly_balance_egp,sms_alerts,overdraft_protection,overdraft_limit_egp,employer
+C001,Mariam Adel,,Plus,40,phone,en,6th of October,mariam.adel1@example.com,+20 10 5550 0001,32807,N,N,0,Cairo Tech Solutions
+C002,Salma Helmy,,Plus,32,app_chat,ar,Mansoura,salma.helmy2@example.com,+20 10 5550 0002,26965,N,N,0,Pyramid Telecom
+C003,Hana Shawky,,Plus,90,app_chat,en,Hurghada,hana.shawky3@example.com,+20 10 5550 0003,51920,N,Y,5000,Egyptian Steel Co
+C004,Hana Radwan,,Basic,10,app_chat,en,Cairo,hana.radwan4@example.com,+20 10 5550 0004,27633,N,N,0,Sun Hospitality
+C005,Jana Hassan,,Basic,53,phone,ar,Giza,jana.hassan5@example.com,+20 10 5550 0005,12167,N,N,0,Egyptian Steel Co
+C006,Seif Abdelaziz,Nile Print Shop,SMB Business,57,phone,ar,Mansoura,seif.abdelaziz6@example.com,+20 10 5550 0006,346491,N,N,0,
+C007,Reem Zaki,,Plus,17,app_chat,en,Assiut,reem.zaki7@example.com,+20 10 5550 0007,57530,N,Y,5000,Sun Hospitality
+C008,Habiba Hamdy,,Basic,73,app_chat,en,Assiut,habiba.hamdy8@example.com,+20 10 5550 0008,22538,N,N,0,Horizon Schools
+C009,Youssef Fathy,,Premier,95,web_chat,ar,Port Said,youssef.fathy9@example.com,+20 10 5550 0009,315840,Y,N,0,Nile Logistics
+C010,Sherif Fathy,,Basic,22,web_chat,en,Giza,sherif.fathy10@example.com,+20 10 5550 0010,3244,N,N,0,Delta Pharma
+C011,Omar Saleh,,Premier,42,app_chat,ar,Cairo,omar.saleh11@example.com,+20 10 5550 0011,530612,Y,N,0,Egyptian Steel Co
+C012,Farida Hassan,,Plus,71,app_chat,en,Giza,farida.hassan12@example.com,+20 10 5550 0012,12535,N,N,0,Nile Logistics
+C013,Heba Zaki,,Basic,94,web_chat,en,Mansoura,heba.zaki13@example.com,+20 10 5550 0013,4266,N,N,0,Pyramid Telecom
+C014,Mahmoud Zaki,,Basic,46,app_chat,en,Hurghada,mahmoud.zaki14@example.com,+20 10 5550 0014,2830,N,N,0,Egyptian Steel Co
+C015,Mariam Hassan,,Premier,7,web_chat,en,Cairo,mariam.hassan15@example.com,+20 10 5550 0015,211733,Y,Y,5000,Egyptian Steel Co
+C016,Jana Helmy,,Premier,76,phone,en,Tanta,jana.helmy16@example.com,+20 10 5550 0016,715427,Y,Y,2000,Misr Consulting
+C017,Tarek Kamal,,Basic,55,phone,ar,Sheikh Zayed,tarek.kamal17@example.com,+20 10 5550 0017,16809,Y,N,0,Cairo Tech Solutions
+C018,Yasmin Hamdy,,Plus,27,phone,en,Tanta,yasmin.hamdy18@example.com,+20 10 5550 0018,15161,N,Y,2000,Horizon Schools
+C019,Ali Nabil,,Premier,73,app_chat,en,Cairo,ali.nabil19@example.com,+20 10 5550 0019,229046,Y,N,0,Delta Pharma
+C020,Farida Nabil,,Basic,54,app_chat,ar,Giza,farida.nabil20@example.com,+20 10 5550 0020,4778,N,N,0,Sun Hospitality
+C021,Heba Radwan,,Premier,74,phone,ar,Giza,heba.radwan21@example.com,+20 10 5550 0021,880429,Y,N,0,Egyptian Steel Co
+C022,Ahmed Kamal,,Plus,10,web_chat,en,Cairo,ahmed.kamal22@example.com,+20 10 5550 0022,45957,Y,N,0,Misr Consulting
+C023,Sherif Zaki,,Premier,26,app_chat,ar,Hurghada,sherif.zaki23@example.com,+20 10 5550 0023,682496,Y,Y,2000,Egyptian Steel Co
+C024,Amr Fathy,Sahel Coffee Roasters,SMB Business,34,phone,en,Hurghada,amr.fathy24@example.com,+20 10 5550 0024,338673,Y,N,0,
+C025,Farida Lotfy,,Premier,36,app_chat,en,Assiut,farida.lotfy25@example.com,+20 10 5550 0025,742683,Y,N,0,Pyramid Telecom
+C026,Nada Farouk,,Premier,61,web_chat,en,Cairo,nada.farouk26@example.com,+20 10 5550 0026,854318,Y,N,0,Delta Pharma
+C027,Ali Tawfik,,Premier,30,phone,en,New Cairo,ali.tawfik27@example.com,+20 10 5550 0027,254837,Y,Y,2000,Pyramid Telecom
+C028,Habiba Nabil,,Plus,72,web_chat,en,Hurghada,habiba.nabil28@example.com,+20 10 5550 0028,18338,N,N,0,Delta Pharma
+C029,Seif Ghoneim,,Plus,20,web_chat,en,Cairo,seif.ghoneim29@example.com,+20 10 5550 0029,14788,N,N,0,Nile Logistics
+C030,Jana Ghoneim,,Premier,84,web_chat,en,Port Said,jana.ghoneim30@example.com,+20 10 5550 0030,509536,Y,Y,3000,Horizon Schools
+C031,Yasmin Hassan,Delta Auto Parts,SMB Business,8,app_chat,en,6th of October,yasmin.hassan31@example.com,+20 10 5550 0031,185060,N,N,0,
+C032,Heba El-Sayed,,Premier,74,app_chat,en,Cairo,heba.elsayed32@example.com,+20 10 5550 0032,728478,Y,N,0,Cairo Tech Solutions
+C033,Aya Abdelaziz,,Premier,21,phone,ar,Giza,aya.abdelaziz33@example.com,+20 10 5550 0033,537151,Y,N,0,Delta Pharma
+C034,Mohamed Shawky,Zayed Dental Supplies,SMB Business,48,app_chat,en,Assiut,mohamed.shawky34@example.com,+20 10 5550 0034,60916,N,N,0,
+C035,Laila Shawky,,Basic,33,app_chat,en,Giza,laila.shawky35@example.com,+20 10 5550 0035,4129,N,N,0,Delta Pharma
+C036,Mona Wahba,Maadi Bakery,SMB Business,88,app_chat,en,New Cairo,mona.wahba36@example.com,+20 10 5550 0036,255856,N,N,0,
+C037,Laila Hamdy,Alex Marine Tools,SMB Business,31,app_chat,en,Tanta,laila.hamdy37@example.com,+20 10 5550 0037,286777,N,N,0,
+C038,Malak Nabil,,Basic,38,app_chat,ar,New Cairo,malak.nabil38@example.com,+20 10 5550 0038,18256,N,N,0,Sun Hospitality
+C039,Adham Mostafa,,Plus,36,app_chat,en,Hurghada,adham.mostafa39@example.com,+20 10 5550 0039,15559,N,N,0,Horizon Schools
+C040,Salma Fathy,,Premier,43,phone,en,Hurghada,salma.fathy40@example.com,+20 10 5550 0040,512479,Y,N,0,Cairo Tech Solutions
+C041,Hassan Fouad,,Basic,3,phone,ar,Port Said,hassan.fouad41@example.com,+20 10 5550 0041,28425,N,N,0,Egyptian Steel Co
+C042,Mostafa Lotfy,,Premier,82,web_chat,ar,Assiut,mostafa.lotfy42@example.com,+20 10 5550 0042,846503,Y,N,0,Cairo Tech Solutions
+C043,Mohamed Zaki,,Basic,92,web_chat,ar,Port Said,mohamed.zaki43@example.com,+20 10 5550 0043,15888,N,N,0,Sun Hospitality
+C044,Hassan Helmy,,Basic,54,phone,en,Cairo,hassan.helmy44@example.com,+20 10 5550 0044,25369,N,N,0,Egyptian Steel Co
+C045,Khaled Fouad,,Basic,59,app_chat,en,Port Said,khaled.fouad45@example.com,+20 10 5550 0045,20436,N,N,0,Nile Logistics
+C046,Farida Ghoneim,,Basic,89,web_chat,en,Alexandria,farida.ghoneim46@example.com,+20 10 5550 0046,3545,N,N,0,Nile Logistics
+C047,Nour Samir,,Basic,61,phone,ar,Assiut,nour.samir47@example.com,+20 10 5550 0047,4692,N,N,0,Sun Hospitality
+C048,Hossam Hamdy,,Basic,57,app_chat,ar,Giza,hossam.hamdy48@example.com,+20 10 5550 0048,845,N,N,0,Misr Consulting
+C049,Yasmin Abdelaziz,,Basic,62,phone,ar,Port Said,yasmin.abdelaziz49@example.com,+20 10 5550 0049,1794,N,N,0,Misr Consulting
+C050,Sherif Lotfy,,Premier,23,phone,en,Tanta,sherif.lotfy50@example.com,+20 10 5550 0050,724485,Y,N,0,Horizon Schools

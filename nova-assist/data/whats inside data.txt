@@ -1,0 +1,11 @@
+Customers: 50, across Basic, Plus, Premier and SMB plans, about a third preferring Arabic.
+Cards: 72, including 8 replacement cases (lost, stolen, damaged and a fraud block).
+Transactions: 500, from 1 Aug to 18 Sep 2026.
+Every fee is tied to the policy section that sets it, e.g. the 3% international fee links back to the purchase that caused it.
+Customer C001 (Mariam Adel) has the three sample rows from the brief. Her Unknown POS #4471 charge has an open dispute, with a decision due 20 Oct.
+Disputes: 16, at every status (submitted, under review, provisional credit, resolved).
+Tickets: 200. 60% are the top three reasons, matching the brief, and 59 are in Arabic or Egyptian Arabic.
+Policies: 20 documents (POL-01 to POL-20) with numbered sections the copilot can cite, e.g. “POL-04 §1”.
+README and generator: the README explains how to load everything into Supabase, and the generator script rebuilds the same data if you need changes.
+
+(The original file in the shared Drive folder also lists the demo sign-in credentials and an API key. They were removed from this copy and must not be committed.)
