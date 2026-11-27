@@ -1,4 +1,4 @@
-// Runs the team's 120 eval cases against index.html's rule-based pipeline in Node, with no browser.
+// Runs the team's 120 eval cases against the rule-based pipeline (nova-core.js, driven by index.html's eval code) in Node, with no browser.
 // Usage: node scripts/run_evals.mjs [--fails]
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
@@ -21,6 +21,7 @@ const ctx = { window: {}, document, performance, console, setTimeout: () => 0, s
 ctx.window = ctx;
 vm.createContext(ctx);
 vm.runInContext(readFileSync(path.join(root, "nova-data.js"), "utf8"), ctx);
+vm.runInContext(readFileSync(path.join(root, "nova-core.js"), "utf8"), ctx);
 vm.runInContext(inline + "\n;globalThis.__run=async()=>{await document.querySelector('#runEvals').onclick();return evalRows;};", ctx);
 
 const rows = await ctx.__run();

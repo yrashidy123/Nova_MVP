@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nova Assist Mobile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EEF0F5;--page:#E3E6EE;--surface:#FFFFFF;--ink:#1C2333;--muted:#5B6475;--brand:#2B2A6B;--on-brand:#FFFFFF;
+  --accent:#8A5A00;--accent-bg:#FBEFD6;--ok:#2F7D5B;--ok-bg:#E2F2EA;--bad:#B3261E;--warn:#9A6200;--warn-bg:#FDF2DC;--line:#DADFE6;--soft:#F1F3F8;
+  --bubble-user:#2B2A6B;--shadow:0 1px 2px rgba(20,24,40,.06),0 4px 16px rgba(20,24,40,.06);
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12141C;--page:#0B0C12;--surface:#1B1E29;--ink:#E8EAF0;--muted:#9AA1B2;--brand:#A9A6F2;--on-brand:#14132E;
+  --accent:#E7B44A;--accent-bg:#3A2E14;--ok:#6BC59A;--ok-bg:#1C3328;--bad:#F08A80;--warn:#E7B44A;--warn-bg:#3A2E14;--line:#2C3040;--soft:#242838;
+  --bubble-user:#4B48A8;--shadow:none;color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#12141C;--page:#0B0C12;--surface:#1B1E29;--ink:#E8EAF0;--muted:#9AA1B2;--brand:#A9A6F2;--on-brand:#14132E;
+  --accent:#E7B44A;--accent-bg:#3A2E14;--ok:#6BC59A;--ok-bg:#1C3328;--bad:#F08A80;--warn:#E7B44A;--warn-bg:#3A2E14;--line:#2C3040;--soft:#242838;
+  --bubble-user:#4B48A8;--shadow:none;color-scheme:dark;}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);font:1rem/1.5 "IBM Plex Sans Arabic",system-ui,-apple-system,"Segoe UI",Tahoma,sans-serif}
+button,select,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+[hidden]{display:none!important}
+
+/* ---------- Demo layout: phone frame + notes ---------- */
+.stage{display:flex;gap:32px;justify-content:center;align-items:flex-start;padding:24px 16px}
+.phone{width:390px;height:min(844px,calc(100vh - 48px));min-height:600px;flex:none;border-radius:44px;background:#0d0e14;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.screen{position:relative;width:100%;height:100%;border-radius:34px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.notch{position:absolute;top:8px;left:50%;transform:translateX(-50%);width:110px;height:30px;border-radius:20px;background:#0d0e14;z-index:50}
+.side{max-width:400px;font-size:14px}
+.side h1{font-size:20px;margin:4px 0 6px}
+.side p{color:var(--muted);margin:0 0 12px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.panel h2{font-size:14px;margin:0 0 10px}
+.panel label{display:block;font-size:13px;color:var(--muted);margin:8px 0 4px}
+.panel select{width:100%;padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg)}
+.seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{flex:1;border:0;background:var(--bg);padding:7px}
+.seg button[aria-pressed="true"]{background:var(--brand);color:var(--on-brand)}
+.check{list-style:none;padding:0;margin:0}
+.check li{padding:5px 0 5px 24px;position:relative;border-bottom:1px solid var(--line)}
+.check li:last-child{border-bottom:0}
+.check li::before{content:"✓";position:absolute;left:2px;color:var(--ok);font-weight:600}
+.check.native li::before{content:"↗";color:var(--muted)}
+.status-line{font-size:13px;color:var(--muted);margin-top:10px}
+.linkbtn{background:none;border:1px solid var(--line);border-radius:10px;padding:7px 12px;margin-top:10px;width:100%}
+
+/* Full screen on a real phone, or when embedded with ?embed=1 */
+@media (max-width:600px){
+  .stage{padding:0;display:block}
+  .phone{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:none}
+  .screen{border-radius:0}
+  .notch{display:none}
+  .side{display:none}
+  body{overflow:hidden}
+}
+body.embed{overflow:hidden}
+body.embed .stage{padding:0;display:block}
+body.embed .phone{width:100%;height:100dvh;border-radius:0;padding:0;box-shadow:none;background:none}
+body.embed .screen{border-radius:0}
+body.embed .notch,body.embed .side{display:none}
+
+/* ---------- Mock banking app ---------- */
+.app{flex:1;overflow-y:auto;padding:calc(48px + env(safe-area-inset-top,0px)) 16px 96px}
+@media (max-width:600px){.app{padding-top:calc(16px + env(safe-area-inset-top,0px))}}
+body.embed .app{padding-top:calc(16px + env(safe-area-inset-top,0px))}
+.hello{font-size:22px;font-weight:600;margin:4px 0 2px}
+.sub{color:var(--muted);font-size:14px;margin:0 0 16px}
+.acct{background:var(--brand);color:var(--on-brand);border-radius:20px;padding:18px;margin-bottom:18px}
+.acct small{opacity:.8;display:block}
+.acct b{font-size:24px;font-weight:600;display:block;margin:4px 0 8px}
+.acct .row{display:flex;justify-content:space-between;font-size:13px;opacity:.9}
+.sec-h{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px}
+.sec-h h3{font-size:16px;margin:0}
+.list{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.item{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:10px 14px;background:none;border:0;border-bottom:1px solid var(--line);text-align:start}
+.item:last-child{border-bottom:0}
+.ico{width:38px;height:38px;border-radius:12px;background:var(--soft);display:grid;place-items:center;flex:none;font-size:17px}
+.item .mid{flex:1;min-width:0}
+.item .t1,.item .t2{display:block}
+.item .t1{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .t2{font-size:13px;color:var(--muted)}
+.amt{font-variant-numeric:tabular-nums;font-weight:500;white-space:nowrap}
+.amt.in{color:var(--ok)}
+.pill{display:inline-block;font-size:12px;border-radius:999px;padding:1px 8px;background:var(--soft);color:var(--muted)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.bad{background:var(--warn-bg);color:var(--bad)}
+.help-card{display:flex;gap:12px;align-items:center;width:100%;background:var(--surface);border:0;border-radius:16px;padding:14px;box-shadow:var(--shadow);text-align:start;margin-top:8px}
+.help-card .ico{background:var(--brand);color:var(--on-brand)}
+.tabbar{position:absolute;left:0;right:0;bottom:0;display:flex;background:var(--surface);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom,0px));z-index:5}
+.tabbar button{flex:1;background:none;border:0;padding:6px 0;min-height:48px;font-size:12px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px}
+.tabbar button[aria-current="page"]{color:var(--brand);font-weight:600}
+.tabbar svg{width:22px;height:22px}
+.fab{position:absolute;bottom:calc(76px + env(safe-area-inset-bottom,0px));inset-inline-end:16px;z-index:6;border:0;border-radius:999px;background:var(--brand);color:var(--on-brand);padding:12px 18px;min-height:48px;font-weight:600;box-shadow:0 6px 18px rgba(43,42,107,.35);display:flex;gap:8px;align-items:center}
+.fab svg{width:20px;height:20px}
+.cardtile{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:16px;margin-bottom:10px}
+.cardtile .top{display:flex;justify-content:space-between;align-items:center}
+.cardtile .num{font-size:18px;letter-spacing:.08em;margin:10px 0;font-variant-numeric:tabular-nums}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:9px 16px;min-height:44px;font-size:14px}
+.btn.primary{background:var(--brand);color:var(--on-brand);border-color:var(--brand)}
+.btn.block{width:100%}
+.btn:disabled{opacity:.5;cursor:default}
+
+/* ---------- Bottom sheets and toast ---------- */
+.scrim{position:absolute;inset:0;background:rgba(10,12,20,.45);z-index:60;opacity:0;transition:opacity .2s}
+.scrim.on{opacity:1}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:61;background:var(--surface);border-radius:20px 20px 0 0;padding:8px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:80%;overflow-y:auto;transform:translateY(100%);transition:transform .25s ease}
+.sheet.on{transform:none}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 12px}
+.sheet h3{margin:0 0 4px;font-size:18px}
+.sheet .meta{color:var(--muted);font-size:14px;margin-bottom:12px}
+.sheet .body{white-space:pre-wrap;font-size:15px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px;margin:8px 0 14px}
+.kv dt{color:var(--muted)}.kv dd{margin:0;text-align:end}
+.toast{position:absolute;left:16px;right:16px;bottom:calc(90px + env(safe-area-inset-bottom,0px));z-index:80;background:var(--ink);color:var(--bg);border-radius:12px;padding:12px 14px;font-size:14px;opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+
+/* ---------- Chat (full-screen sheet) ---------- */
+.chat{position:absolute;inset:0;z-index:40;background:var(--bg);display:flex;flex-direction:column;transform:translateY(100%);transition:transform .28s ease;visibility:hidden}
+.chat.on{transform:none;visibility:visible}
+.chat-h{display:flex;align-items:center;gap:6px;padding:calc(44px + env(safe-area-inset-top,0px)) 8px 8px;background:var(--surface);border-bottom:1px solid var(--line)}
+@media (max-width:600px){.chat-h{padding-top:calc(8px + env(safe-area-inset-top,0px))}}
+body.embed .chat-h{padding-top:calc(8px + env(safe-area-inset-top,0px))}
+.iconbtn{width:44px;height:44px;border:0;background:none;border-radius:12px;display:grid;place-items:center;flex:none}
+.iconbtn svg{width:24px;height:24px}
+[dir="rtl"] .flip{transform:scaleX(-1)}
+.chat-h .title{flex:1;min-width:0}
+.chat-h .title b{display:block;font-size:16px}
+.chat-h .title span{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.banner{display:flex;gap:10px;align-items:flex-start;padding:10px 14px;font-size:13.5px;background:var(--warn-bg);color:var(--ink);border-bottom:1px solid var(--line)}
+.banner.agent{background:var(--ok-bg)}
+.banner b{font-weight:600}
+.msgs{flex:1;overflow-y:auto;padding:14px 12px 8px;display:flex;flex-direction:column;gap:12px;overscroll-behavior:contain}
+.msg{max-width:86%;animation:in .2s ease}
+@keyframes in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.msg,.chat,.sheet,.scrim,.toast{animation:none;transition:none}}
+.msg.user{align-self:flex-end}
+.msg.bot{align-self:flex-start}
+.bubble{padding:10px 14px;border-radius:18px;overflow-wrap:anywhere;font-size:15px}
+.bubble p{white-space:pre-wrap}
+.user .bubble{white-space:pre-wrap;background:var(--bubble-user);color:#fff;border-end-end-radius:6px}
+.bot .bubble{background:var(--surface);border-end-start-radius:6px;box-shadow:var(--shadow)}
+.bubble p{margin:0 0 8px}.bubble p:last-child{margin:0}
+.about{font-size:12px;color:var(--muted);margin:0 4px 4px;text-align:end}
+.typing{display:flex;gap:4px;padding:14px 16px}
+.typing i{width:7px;height:7px;border-radius:50%;background:var(--muted);animation:blink 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.rule{margin-top:10px;border-inline-start:3px solid var(--accent);background:var(--soft);border-radius:8px;padding:8px 10px;font-size:13.5px}
+.rule .rh{font-weight:600;font-size:12.5px;color:var(--accent);margin-bottom:2px}
+.rule .rb{white-space:pre-wrap;max-height:4.6em;overflow:hidden}
+.rule.open .rb{max-height:none}
+.rule button{background:none;border:0;padding:4px 0 0;color:var(--brand);font-size:13px;font-weight:500}
+.rcard{margin-top:10px;background:var(--soft);border-radius:12px;padding:10px 12px;font-size:14px}
+.rcard .rt{display:flex;justify-content:space-between;gap:8px;align-items:center;font-weight:500}
+.rcard .rs{color:var(--muted);font-size:13px}
+.steps{list-style:none;margin:10px 0 4px;padding:0}
+.steps li{position:relative;padding:0 0 10px 22px;font-size:13.5px}
+[dir="rtl"] .steps li{padding:0 22px 10px 0}
+.steps li::before{content:"";position:absolute;inset-inline-start:2px;top:5px;width:10px;height:10px;border-radius:50%;border:2px solid var(--line);background:var(--surface)}
+.steps li::after{content:"";position:absolute;inset-inline-start:7px;top:17px;bottom:-1px;width:2px;background:var(--line)}
+.steps li:last-child::after{display:none}
+.steps li.done::before{background:var(--ok);border-color:var(--ok)}
+.steps li.now::before{background:var(--brand);border-color:var(--brand)}
+.steps li span{display:block;color:var(--muted);font-size:12.5px}
+.srcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.src{font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 10px;min-height:30px}
+.src::before{content:"📄 ";}
+.foot{display:flex;align-items:center;gap:4px;margin:4px 4px 0}
+.foot .lbl{font-size:12px;color:var(--muted);flex:1}
+.thumb{width:36px;height:36px;border:0;background:none;border-radius:10px;font-size:16px;opacity:.7}
+.thumb[aria-pressed="true"]{opacity:1;background:var(--soft)}
+.ticket{margin-top:10px;border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface)}
+.ticket .rt{display:flex;justify-content:space-between;gap:8px;font-weight:500}
+.notice{background:var(--warn-bg)!important}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:4px 12px 8px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:8px 14px;min-height:40px;font-size:14px;white-space:nowrap}
+.ctx{display:flex;align-items:center;gap:8px;margin:0 12px 6px;padding:6px 6px 6px 12px;border-radius:12px;background:var(--surface);border:1px solid var(--line);font-size:13px}
+.ctx span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ctx button{width:32px;height:32px;border:0;background:none;border-radius:8px}
+.pii{margin:0 12px 6px;padding:8px 12px;border-radius:10px;background:var(--warn-bg);font-size:13px}
+.composer{display:flex;gap:8px;align-items:flex-end;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line)}
+.composer textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);background:var(--bg);border-radius:20px;padding:10px 14px;font-size:16px;line-height:1.35;max-height:120px}
+.send{width:44px;height:44px;border-radius:50%;border:0;background:var(--brand);color:var(--on-brand);display:grid;place-items:center;flex:none}
+.send:disabled{opacity:.4}
+.send svg{width:20px;height:20px}
+.disclaim{font-size:11.5px;color:var(--muted);text-align:center;padding:0 12px 6px;background:var(--surface)}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone">
+    <div class="screen" id="screen">
+      <div class="notch" aria-hidden="true"></div>
+
+      <!-- Mock Nova Bank app (the host app; only the chat is Nova Assist) -->
+      <main class="app" id="app"></main>
+      <button class="fab" id="fab" type="button"></button>
+      <nav class="tabbar" id="tabbar"></nav>
+
+      <!-- Nova Assist chat -->
+      <section class="chat" id="chat" role="dialog" aria-modal="true" aria-labelledby="chatTitle">
+        <header class="chat-h">
+          <button class="iconbtn" id="back" type="button"><svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+          <div class="title"><b id="chatTitle"></b><span id="chatSub"></span></div>
+          <button class="iconbtn" id="agentBtn" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1v-6h3zM3 19a2 2 0 002 2h1v-6H3z"/></svg></button>
+        </header>
+        <div class="banner" id="offline" hidden></div>
+        <div class="banner agent" id="agentBanner" hidden></div>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <div class="chips" id="chips"></div>
+        <div class="ctx" id="ctx" hidden><span id="ctxText"></span><button type="button" id="ctxX">✕</button></div>
+        <div class="pii" id="pii" hidden></div>
+        <form class="composer" id="form">
+          <textarea id="q" rows="1" autocomplete="off"></textarea>
+          <button class="send" id="sendBtn" type="submit" disabled><svg class="flip" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/></svg></button>
+        </form>
+        <div class="disclaim" id="disclaim"></div>
+      </section>
+
+      <div class="scrim" id="scrim" hidden></div>
+      <div class="sheet" id="sheet" role="dialog" aria-modal="true" hidden><div class="grab"></div><div id="sheetBody"></div></div>
+      <div class="toast" id="toast" role="status"></div>
+    </div>
+  </div>
+
+  <aside class="side">
+    <h1>Nova Assist in the mobile app</h1>
+    <p>A prototype of the customer chat embedded in the Nova Bank app, using the same guarded pipeline and the team’s synthetic data as the console. The phone on the left is a mock of the host app; only the chat is Nova Assist.</p>
+    <div class="panel">
+      <h2>Demo controls</h2>
+      <label for="cust">Signed-in customer (the app supplies this; it’s never chosen in the chat)</label>
+      <select id="cust"></select>
+      <label>App language</label>
+      <div class="seg" id="langSeg"><button type="button" data-l="en">English</button><button type="button" data-l="ar">العربية</button></div>
+      <label>Theme</label>
+      <div class="seg" id="themeSeg"><button type="button" data-t="auto">System</button><button type="button" data-t="light">Light</button><button type="button" data-t="dark">Dark</button></div>
+      <div class="status-line" id="aiStatus">AI: checking…</div>
+      <button class="linkbtn" type="button" id="signout">Sign out (clears the chat)</button>
+    </div>
+    <div class="panel">
+      <h2>In this prototype</h2>
+      <ul class="check">
+        <li>Chat only: no evals, queue, audit or customer picker inside the app</li>
+        <li>Opens from a transaction, a card or Help, with that context attached</li>
+        <li>Full-screen sheet, native header, 44 pt targets, 16 px input</li>
+        <li>Dispute timeline, card delivery and payment cards</li>
+        <li>Plain source labels; tap one for the full source</li>
+        <li>No internal check trace or “Blocked” labels</li>
+        <li>Whole layout mirrors in Arabic, with Arabic dates and digits</li>
+        <li>Handoff ticket with status and a waiting banner</li>
+        <li>Card number, PIN and OTP warning while typing</li>
+        <li>Three context-aware suggestions, typing indicator, thumbs up/down, offline state</li>
+        <li>Follows dark mode and text size</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <h2>Native app work (not in a web prototype)</h2>
+      <ul class="check native">
+        <li>Pass a short-lived session token to the web view; never a customer ID in the URL</li>
+        <li>Push notification when an agent replies</li>
+        <li>Block screenshots of the chat on Android (FLAG_SECURE)</li>
+        <li>Keep history between visits; clear on sign-out</li>
+        <li>Deep links from chat buttons into native screens</li>
+      </ul>
+    </div>
+  </aside>
+</div>
+
+<script src="nova-data.js"></script>
+<script src="nova-core.js"></script>
+<script>
+/* ---------- Host hooks required by nova-core.js ---------- */
+let lastTicket=null;
+function createTicket(type,status,category,summary,citations){
+  const t={id:"NB-"+(++ticketSeq),type,status,customer:session.id,category:category||"other",summary,citations:citations||[],transcript:transcript.slice(-8),created:new Date().toISOString()};
+  tickets.unshift(t); lastTicket=t; return t;
+}
+function setAI(state){ aiState=state; $("#aiStatus").textContent=state==="on"?"AI: on (Claude writes answers, rules check them)":state==="checking"?"AI: checking…":"AI: off, answers come from the built-in rules"; }
+
+/* ---------- Strings ---------- */
+let appLang="en";
+const S={
+  hello:["Hi","أهلاً"],plan:["plan","باقة"],avg:["Average monthly balance","متوسط الرصيد الشهري"],recent:["Recent activity","آخر المعاملات"],
+  cards:["Cards","الكروت"],home:["Home","الرئيسية"],help:["Help","المساعدة"],ask:["Ask Nova","اسأل نوفا"],
+  helpCard:["Questions about a fee, a dispute or your card?","عندك سؤال عن رسوم أو نزاع أو الكارت؟"],helpSub:["Nova Assist answers from Nova’s policies and your account","Nova Assist بيرد من سياسات نوفا وبيانات حسابك"],
+  title:["Nova Assist","Nova Assist"],sub:["Answers from Nova’s policies and your account","بيرد من سياسات نوفا وبيانات حسابك"],
+  placeholder:["Ask about a fee, dispute or card","اسأل عن رسوم أو نزاع أو كارت"],
+  disclaim:["Nova Assist can’t approve, refund or move money. An agent can.","Nova Assist مش بيوافق ولا بيرجع ولا بيحوّل فلوس. الموظف بيقدر."],
+  welcome:["Hi {n}. I can explain fees, check a dispute or help with your card, using Nova’s policies and your own account. I’ll show where each answer comes from.","أهلاً يا {n}. أقدر أشرحلك الرسوم، أتابع النزاع، أو أساعدك في الكارت، من سياسات نوفا وحسابك إنت. وهوريك كل إجابة جاية منين."],
+  about:["About","بخصوص"],agentQ:["Talk to a Nova agent?","تكلم موظف من نوفا؟"],
+  agentBody:["We’ll send the agent a short summary of this chat and the sources, so you won’t have to repeat yourself. Agents are available 24/7.","هنبعت للموظف ملخص الشات والمصادر، فمش هتحتاج تعيد الكلام. الموظفين متاحين 24 ساعة."],
+  connect:["Connect me","وصلني"],agentBtn:["Talk to an agent","كلم موظف"],standard:["Standard delivery","توصيل عادي"],express:["Express delivery","توصيل سريع"],cancel:["Cancel","إلغاء"],
+  waiting:["Waiting for an agent","في انتظار موظف"],notify:["We’ll notify you here when they reply.","هنبعتلك إشعار هنا لما يرد."],
+  pending:["Pending human review","في انتظار مراجعة موظف"],request:["Request","طلب"],
+  helpful:["Was this helpful?","الإجابة دي مفيدة؟"],thanks:["Thanks, your feedback helps us improve.","شكراً، رأيك بيساعدنا نتحسن."],
+  more:["Show more","المزيد"],less:["Show less","أقل"],rule:["Nova rule","قاعدة نوفا"],
+  offline:["You’re offline. Messages will send when you’re back online.","إنت أوفلاين. الرسايل هتتبعت لما النت يرجع."],
+  error:["Something went wrong. Your message wasn’t lost.","حصلت مشكلة. رسالتك متمسحتش."],retry:["Try again","حاول تاني"],
+  pii:["Never share your full card number, PIN, OTP or password, not even with Nova. We’ll hide the number before sending.","متشاركش رقم الكارت كامل أو الـ PIN أو الـ OTP أو الباسورد، حتى مع نوفا. هنخفي الرقم قبل الإرسال."],
+  piiHard:["Please don’t share PINs, OTPs or passwords. Nova will never ask for them.","من فضلك متشاركش PIN أو OTP أو باسورد. نوفا عمرها ما هتطلبهم."],
+  askThis:["Ask about this payment","اسأل عن الدفع ده"],cardHelp:["Lost or damaged card?","الكارت ضاع أو اتلف؟"],freeze:["Freeze card","تجميد الكارت"],
+  frozenToast:["In the real app this freezes the card. Nova Assist never does it for you.","في التطبيق الحقيقي ده بيجمد الكارت. Nova Assist مش بيعمل كده بنفسه."],
+  openCards:["Open Cards","افتح الكروت"],reportQ:["Send a dispute request?","تبعت طلب نزاع؟"],
+  reportBody:["Disputes Operations reviews it and decides the outcome. Nova acknowledges within 2 business days and decides within 45 days.","فريق النزاعات بيراجعه وبيقرر. نوفا بترد خلال يومين عمل وبتقرر خلال 45 يوم."],
+  send:["Send request","ابعت الطلب"],date:["Date","التاريخ"],amount:["Amount","المبلغ"],status:["Status","الحالة"],category:["Category","التصنيف"],feeRule:["Fee rule","قاعدة الرسوم"],
+  yourPayment:["Your payment","الدفع بتاعك"],yourDispute:["Your dispute","النزاع بتاعك"],yourCard:["Card ending","كارت بينتهي بـ"],yourTicket:["Support request","طلب دعم"],
+  filed:["Filed","اتسجل"],ack:["Acknowledged","اتأكد الاستلام"],review:["Under review","قيد المراجعة"],decision:["Decision","القرار"],decisionBy:["Expected by","متوقع قبل"],latest:["Latest update","آخر تحديث"],
+  requested:["Requested","اتطلب"],onWay:["On its way","في الطريق"],delivered:["Delivered","اتسلم"],dueBy:["Due by","متوقع قبل"],newCard:["New card ending","الكارت الجديد بينتهي بـ"],
+  within2:["within 2 business days","خلال يومين عمل"],
+  sent:["Sent to a Nova agent","اتبعت لموظف نوفا"],
+};
+const t=(k,v={})=>{let s=(S[k]||[k,k])[appLang==="ar"?1:0];for(const [a,b] of Object.entries(v))s=s.replace("{"+a+"}",b);return s;};
+const AR_MONTHS=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+const num=(n,d=2)=>Number(n).toLocaleString(appLang==="ar"?"ar-EG":"en-US",{minimumFractionDigits:d,maximumFractionDigits:d});
+const money=(n,sign=false)=>{const s=sign?(n<0?"−":"+"):"";return appLang==="ar"?`${s}${num(Math.abs(n))} ج.م`:`${s}EGP ${num(Math.abs(n))}`;};
+const day=iso=>{if(!iso)return "";const [y,m,d]=iso.slice(0,10).split("-");return appLang==="ar"?`${num(+d,0)} ${AR_MONTHS[m-1]}`:`${+d} ${MONTHS[m-1]}`;};
+const dayY=iso=>{if(!iso)return "";const y=iso.slice(0,4);return day(iso)+" "+(appLang==="ar"?Number(y).toLocaleString("ar-EG",{useGrouping:false}):y);};
+const CAT_ICON={Fees:"🧾",Groceries:"🛒",Dining:"🍽️",Transport:"🚕",Shopping:"🛍️",Travel:"✈️",Cash:"🏧",Income:"💼",Transfers:"🔁",Utilities:"💡",Entertainment:"🎬",Health:"💊",Education:"🎓"};
+const icon=c=>CAT_ICON[c]||"💳";
+const STAT_TXT={posted:["Posted","مكتمل"],pending:["Pending","معلق"],disputed:["Disputed","عليه نزاع"],reversed:["Reversed","اتلغى"],declined:["Declined","مرفوض"]};
+const stat=s=>(STAT_TXT[s]||[s,s])[appLang==="ar"?1:0];
+const CARD_TXT={active:["Active","شغال"],blocked_lost:["Blocked · lost","موقوف · ضايع"],blocked_stolen:["Blocked · stolen","موقوف · مسروق"],blocked_fraud:["Blocked by Nova","موقوف من نوفا"],replaced:["Replaced","اتغير"],in_delivery:["On its way","في الطريق"],requested:["Requested","اتطلب"]};
+const cstat=s=>(CARD_TXT[s]||[s,s])[appLang==="ar"?1:0];
+const DSTAT_TXT=s=>(DSTAT[s]||[s,s])[appLang==="ar"?1:0];
+
+/* ---------- Small UI helpers ---------- */
+const screenEl=$("#screen");
+let toastTimer;
+function toast(msg){const el=$("#toast");el.textContent=msg;el.classList.add("on");clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove("on"),2800);}
+let sheetReturn=null;
+function openSheet(html,wire){
+  sheetReturn=document.activeElement;
+  $("#sheetBody").innerHTML=html; $("#sheet").hidden=false; $("#scrim").hidden=false;
+  requestAnimationFrame(()=>{$("#sheet").classList.add("on");$("#scrim").classList.add("on");});
+  if(wire) wire($("#sheetBody"));
+  const f=$("#sheetBody").querySelector("button"); if(f) f.focus({preventScroll:true});
+}
+function closeSheet(){
+  $("#sheet").classList.remove("on"); $("#scrim").classList.remove("on");
+  setTimeout(()=>{$("#sheet").hidden=true;$("#scrim").hidden=true;},220);
+  if(sheetReturn&&sheetReturn.focus) sheetReturn.focus({preventScroll:true});
+}
+$("#scrim").onclick=closeSheet;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){ if(!$("#sheet").hidden) closeSheet(); else if($("#chat").classList.contains("on")) closeChat(); }});
+
+/* ---------- Mock host app ---------- */
+let tab="home";
+const ICONS={home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z"/></svg>',
+  cards:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>',
+  help:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 01-11.8 7L3 21l2-6.2A8 8 0 1121 12z"/></svg>'};
+function renderTabbar(){
+  $("#tabbar").innerHTML=["home","cards","help"].map(k=>`<button type="button" data-k="${k}" ${tab===k?'aria-current="page"':""}>${ICONS[k]}<span>${t(k)}</span></button>`).join("");
+  $("#tabbar").querySelectorAll("button").forEach(b=>b.onclick=()=>{ if(b.dataset.k==="help"){openChat({from:"help"});return;} tab=b.dataset.k; renderApp(); });
+  $("#fab").innerHTML=ICONS.help+`<span>${t("ask")}</span>`;
+}
+function txRow(x){
+  return `<button class="item" type="button" data-tx="${x.txn_id}"><span class="ico" aria-hidden="true">${icon(x.category)}</span><span class="mid"><span class="t1" dir="auto">${esc(isFee(x)?feeName(x):x.merchant)}</span><span class="t2">${day(x.date)}${x.status!=="posted"?` · <span class="pill ${x.status==="disputed"?"warn":""}">${stat(x.status)}</span>`:""}</span></span><span class="amt ${x.amount_egp>0?"in":""}">${money(x.amount_egp,true)}</span></button>`;
+}
+function renderApp(){
+  renderTabbar();
+  const m=my(), c=session;
+  if(tab==="home"){
+    const recent=[...m.tx].sort((a,b)=>a.date<b.date?1:-1).slice(0,10);
+    $("#app").innerHTML=`<p class="hello">${t("hello")}${appLang==="ar"?"، ":", "}${esc(c.first)}</p><p class="sub">${esc(c.plan)} ${t("plan")}</p>
+      <div class="acct"><small>${t("avg")}</small><b>${money(c.avg_monthly_balance_egp)}</b><div class="row"><span>Nova ${esc(c.plan)}</span><span>${esc(c.city||"")}</span></div></div>
+      <button class="help-card" type="button" id="helpCard"><span class="ico" aria-hidden="true">✦</span><span class="mid"><b>${t("helpCard")}</b><div class="t2" style="color:var(--muted);font-size:13px">${t("helpSub")}</div></span></button>
+      <div class="sec-h"><h3>${t("recent")}</h3></div><div class="list">${recent.map(txRow).join("")}</div>`;
+    $("#helpCard").onclick=()=>openChat({from:"help"});
+    $("#app").querySelectorAll("[data-tx]").forEach(b=>b.onclick=()=>txSheet(b.dataset.tx));
+  } else {
+    $("#app").innerHTML=`<p class="hello">${t("cards")}</p><p class="sub">&nbsp;</p>`+m.cards.map(k=>`<div class="cardtile"><div class="top"><b>${esc(k.product||k.card_type)}</b><span class="pill ${k.status==="active"?"ok":/^blocked/.test(k.status)?"bad":"warn"}">${cstat(k.status)}</span></div>
+      <div class="num" dir="ltr">•••• •••• •••• ${k.last4}</div>
+      ${k.delivery_eta&&k.replaces_card_id&&k.status!=="active"?`<div class="t2" style="color:var(--muted);font-size:13px">${t("dueBy")} ${dayY(k.delivery_eta)}</div>`:""}
+      <div class="btnrow">${k.status==="active"?`<button class="btn" type="button" data-freeze>${t("freeze")}</button>`:""}<button class="btn" type="button" data-card="${k.card_id}">${t("cardHelp")}</button></div></div>`).join("");
+    $("#app").querySelectorAll("[data-freeze]").forEach(b=>b.onclick=()=>toast(t("frozenToast")));
+    $("#app").querySelectorAll("[data-card]").forEach(b=>b.onclick=()=>openChat({from:"card",card:b.dataset.card}));
+  }
+}
+function txSheet(id){
+  const x=my().tx.find(v=>v.txn_id===id); if(!x) return;
+  const rules=(x.policy_ref||"").split(/,\s*/).filter(r=>SEC[r]).map(r=>SEC[r].title).join(", ");
+  openSheet(`<h3 dir="auto">${esc(isFee(x)?feeName(x):x.merchant)}</h3><div class="meta">${money(x.amount_egp,true)}</div>
+    <dl class="kv"><dt>${t("date")}</dt><dd>${dayY(x.date)}</dd><dt>${t("status")}</dt><dd>${stat(x.status)}</dd><dt>${t("category")}</dt><dd>${esc(x.category)}</dd>${rules?`<dt>${t("feeRule")}</dt><dd>${esc(rules)}</dd>`:""}</dl>
+    <button class="btn primary block" type="button" id="askTx">${t("askThis")}</button>`,
+    b=>b.querySelector("#askTx").onclick=()=>{closeSheet();openChat({from:"tx",tx:id});});
+}
+
+/* ---------- Chat state ---------- */
+let ctx=null, busy=false, chatStarted=false, agentTicket=null;
+const feedback=[];
+const msgsEl=$("#msgs");
+function scrollEnd(){ msgsEl.scrollTop=msgsEl.scrollHeight; }
+
+function openChat(o){
+  ctx=null;
+  if(o.from==="tx") ctx={kind:"tx",tx:my().tx.find(x=>x.txn_id===o.tx)};
+  if(o.from==="card") ctx={kind:"card",card:my().cards.find(k=>k.card_id===o.card)};
+  if(!chatStarted){ chatStarted=true; addBot(`<p>${esc(t("welcome",{n:session.first}))}</p>`); }
+  renderCtx(); renderChips();
+  $("#chat").classList.add("on"); $("#chat").setAttribute("aria-hidden","false");
+  setTimeout(()=>{ scrollEnd(); $("#back").focus({preventScroll:true}); },300);
+}
+function closeChat(){ $("#chat").classList.remove("on"); $("#chat").setAttribute("aria-hidden","true"); $("#fab").focus({preventScroll:true}); }
+$("#back").onclick=closeChat; $("#fab").onclick=()=>openChat({from:"help"});
+
+function ctxLabel(){
+  if(!ctx) return "";
+  if(ctx.kind==="tx"){const x=ctx.tx;return `${isFee(x)?feeName(x):x.merchant} · ${money(x.amount_egp,true)} · ${day(x.date)}`;}
+  const k=ctx.card; return `${t("yourCard")} ${k.last4} · ${cstat(k.status)}`;
+}
+function renderCtx(){ $("#ctx").hidden=!ctx; if(ctx){$("#ctxText").textContent=`${t("about")}: ${ctxLabel()}`;} }
+$("#ctxX").onclick=()=>{ctx=null;renderCtx();renderChips();};
+
+/* Suggestions: at most three, chosen for where the chat was opened */
+function suggestions(){
+  const ar=appLang==="ar", m=my();
+  if(ctx&&ctx.kind==="tx"){
+    const x=ctx.tx, amt=Math.abs(x.amount_egp).toFixed(2), name=x.merchant;
+    if(isFee(x)) return [{l:ar?"ليه اتخصم مني ده؟":"Why was I charged this?",q:ar?`ليه اتخصم مني ${amt} يوم ${x.date}؟`:`Why was I charged ${amt} on ${x.date}?`},
+      {l:ar?"أطلب إلغاء الرسوم":"Ask to waive this fee",q:ar?`الغي الرسوم ${amt} يوم ${x.date}`:`Please refund the fee of ${amt} on ${x.date}`}];
+    if(x.status==="disputed") return [{l:ar?"إيه حالة النزاع؟":"What’s happening with my dispute?",q:ar?`إيه حالة النزاع على ${amt}؟`:`What's the status of my dispute for ${amt}?`}];
+    const out=[{l:ar?"إيه الدفع ده؟":"What is this payment?",q:`What is the “${name}” payment of ${amt} on ${x.date}?`}];
+    if(x.amount_egp<0) out.push({l:ar?"اتخصم عليه رسوم؟":"Was there a fee for this?",q:`Was I charged a fee for the ${amt} payment?`});
+    if(x.amount_egp<0&&x.status!=="disputed") out.push({l:ar?"مش عارف الدفع ده":"I don’t recognise this",kind:"report"});
+    return out.slice(0,3);
+  }
+  if(ctx&&ctx.kind==="card"){
+    const out=[{l:ar?"الكارت ضاع أو اتسرق":"My card is lost or stolen",q:ar?"الكارت بتاعي ضاع، أعمل إيه؟":"I lost my card, what do I do?"},
+      {l:ar?"الكارت اتلف":"My card is damaged",q:ar?"الكارت بتاعي اتكسر":"My card is damaged, what do I do?"}];
+    if(m.cards.some(k=>k.replaces_card_id)) out.unshift({l:ar?"فين الكارت الجديد؟":"Where is my new card?",q:ar?"فين الكارت الجديد بتاعي؟":"Where is my new card?"});
+    return out.slice(0,3);
+  }
+  const out=[];
+  if(m.disputes.length) out.push({l:ar?"إيه حالة النزاع بتاعي؟":"What’s happening with my dispute?",q:ar?"إيه حالة النزاع بتاعي؟":"What's happening with my dispute?"});
+  out.push({l:ar?"ليه اتخصم مني رسوم؟":"Why was I charged a fee?",q:ar?"ليه اتخصم مني رسوم؟":"Why was I charged a fee?"});
+  out.push(m.cards.some(k=>k.replaces_card_id)?{l:ar?"فين الكارت الجديد؟":"Where is my new card?",q:ar?"فين الكارت الجديد بتاعي؟":"Where is my new card?"}:{l:ar?"الكارت ضاع":"I lost my card",q:ar?"الكارت بتاعي ضاع، أعمل إيه؟":"I lost my card, what do I do?"});
+  return out.slice(0,3);
+}
+const usedChips=new Set();
+function renderChips(){
+  const list=suggestions().filter(s=>!usedChips.has(s.l));
+  $("#chips").innerHTML=list.map((s,i)=>`<button class="chip" type="button" data-i="${i}">${esc(s.l)}</button>`).join("");
+  $("#chips").querySelectorAll("button").forEach(b=>b.onclick=()=>{const s=list[b.dataset.i]; usedChips.add(s.l); if(s.kind==="report") reportFlow(); else send(s.l,s.q).then(renderChips);});
+}
+
+/* ---------- Messages ---------- */
+function addUser(text,about){
+  const d=document.createElement("div"); d.className="msg user";
+  d.innerHTML=`${about?`<div class="about">${esc(t("about"))}: ${esc(about)}</div>`:""}<div class="bubble" dir="auto">${esc(text)}</div>`;
+  msgsEl.append(d); scrollEnd(); transcript.push({who:"customer",text});
+}
+function addBot(html,cls=""){
+  const d=document.createElement("div"); d.className="msg bot";
+  d.innerHTML=`<div class="bubble ${cls}" dir="auto">${html}</div>`; msgsEl.append(d); scrollEnd(); return d;
+}
+function typing(){ const d=document.createElement("div"); d.className="msg bot"; d.innerHTML=`<div class="bubble typing" aria-label="Nova Assist is typing"><i></i><i></i><i></i></div>`; msgsEl.append(d); scrollEnd(); return d; }
+
+/* Source labels customers can read, in place of T0078 / POL-04 §1 */
+function srcLabel(id){
+  const m=my(), s=SEC[id];
+  if(s) return `${s.doc}, §${s.num}`;
+  const x=m.tx.find(v=>v.txn_id===id); if(x) return `${t("yourPayment")} · ${day(x.date)}`;
+  const d=m.disputes.find(v=>v.dispute_id===id); if(d) return `${t("yourDispute")} · ${d.merchant}`;
+  const k=m.cards.find(v=>v.card_id===id); if(k) return `${t("yourCard")} ${k.last4}`;
+  const tk=m.tickets.find(v=>v.ticket_id===id); if(tk) return `${t("yourTicket")} · ${day(tk.created_at)}`;
+  return null;
+}
+function srcSheet(id){
+  const m=my(), s=SEC[id];
+  if(s){ openSheet(`<h3>${esc(s.title)}</h3><div class="meta">${esc(s.doc)} · §${s.num}</div><div class="body" dir="ltr">${esc(fmtBlock(s.text))}</div>`); return; }
+  const x=m.tx.find(v=>v.txn_id===id); if(x){ txSheet(id); return; }
+  const d=m.disputes.find(v=>v.dispute_id===id); if(d){ openSheet(`<h3>${t("yourDispute")}</h3><div class="meta" dir="auto">${esc(d.merchant)} · ${money(d.amount_egp)}</div>${disputeCard(d)}`); return; }
+  const k=m.cards.find(v=>v.card_id===id); if(k){ openSheet(`<h3>${t("yourCard")} ${k.last4}</h3><div class="meta">${esc(k.product||k.card_type)} · ${cstat(k.status)}</div>`); return; }
+  const tk=m.tickets.find(v=>v.ticket_id===id); if(tk){ openSheet(`<h3>${t("yourTicket")}</h3><div class="meta">${dayY(tk.created_at)} · ${esc(tk.status)}</div><div class="body" dir="auto">${esc(tk.customer_message)}</div>`); }
+}
+
+function disputeCard(d){
+  const resolved=/^resolved/.test(d.status), idx=d.status==="submitted"?0:resolved?3:2;
+  const st=(i,label,sub)=>`<li class="${i<idx||resolved?"done":i===idx?"now":""}">${label}<span>${sub}</span></li>`;
+  return `<div class="rcard"><div class="rt"><span dir="auto">${esc(d.merchant)}</span><span>${money(d.amount_egp)}</span></div>
+    <div class="rs">${DSTAT_TXT(d.status)}</div>
+    <ol class="steps">${st(0,t("filed"),dayY(d.filed_date))}${st(1,t("ack"),t("within2"))}${st(2,t("review"),idx===2?`${t("latest")}: ${dayY(d.last_update_date)}`:"")}${st(3,t("decision"),resolved?dayY(d.last_update_date):`${t("decisionBy")} ${dayY(d.expected_resolution_date)}`)}</ol>
+    <div class="rs" dir="auto">${t("latest")}: ${esc(d.customer_update)}</div></div>`;
+}
+function deliveryCard(k){
+  const idx=k.status==="requested"?0:k.status==="in_delivery"?1:2;
+  const st=(i,label,sub)=>`<li class="${i<idx?"done":i===idx?(idx===2?"done":"now"):""}">${label}<span>${sub}</span></li>`;
+  return `<div class="rcard"><div class="rt"><span>${t("newCard")} ${k.last4}</span><span class="pill">${cstat(k.status)}</span></div>
+    <ol class="steps">${st(0,t("requested"),dayY(k.replacement_requested_date))}${st(1,t("onWay"),k.delivery_method?t(k.delivery_method):"")}${st(2,t("delivered"),`${t("dueBy")} ${dayY(k.delivery_eta)}`)}</ol>
+    <button class="btn" type="button" data-open-cards>${t("openCards")}</button></div>`;
+}
+function txCard(x){
+  return `<div class="rcard"><div class="rt"><span dir="auto">${esc(isFee(x)?feeName(x):x.merchant)}</span><span>${money(x.amount_egp,true)}</span></div><div class="rs">${dayY(x.date)} · ${stat(x.status)}</div></div>`;
+}
+function ticketCard(tk){
+  return `<div class="ticket"><div class="rt"><span>${t("request")} ${tk.id}</span><span class="pill warn">${tk.status==="Waiting for an agent"?t("waiting"):t("pending")}</span></div><div class="rs" style="font-size:13px;color:var(--muted)">${t("sent")} · ${t("notify")}</div></div>`;
+}
+
+/* Turn a pipeline result into a mobile message: text, rule excerpts, record cards, source labels */
+const QUOTE=/^POL-\d+ §\d+, /;
+function renderAnswer(r,ticket){
+  const m=my(), cites=r.citations||[];
+  const disputes=cites.map(id=>m.disputes.find(d=>d.dispute_id===id)).filter(Boolean);
+  const reps=cites.map(id=>m.cards.find(k=>k.card_id===id)).filter(k=>k&&k.replaces_card_id);
+  const shownTx=new Set(disputes.map(d=>d.txn_id));
+  const txs=cites.map(id=>m.tx.find(x=>x.txn_id===id)).filter(x=>x&&!shownTx.has(x.txn_id)).slice(0,3);
+  const paras=[], rules=[];
+  for(const p of r.answer.split("\n\n")){
+    if(/^(Nova’s rules:|قواعد نوفا)/.test(p)) continue;
+    if(QUOTE.test(p)){ const id=p.match(/^(POL-\d+ §\d+)/)[1]; if(SEC[id]) rules.push(id); continue; }
+    if(r.mode==="rules"&&disputes.length&&/^(Your dispute D\d{3}|النزاع D\d{3})/.test(p)) continue;
+    paras.push(p);
+  }
+  if(!paras.length&&disputes.length) paras.push(L(r.lang,"Here’s where your dispute stands.","ده وضع النزاع بتاعك."));
+  if(!paras.length&&rules.length) paras.push(L(r.lang,"Here’s what Nova’s rules say:","دي قواعد نوفا:"));
+  if(!paras.length&&!rules.length&&!txs.length) paras.push(r.answer);
+  const ruleIds=[...new Set(rules)];
+  let html=paras.map(p=>`<p>${esc(p)}</p>`).join("");
+  html+=disputes.map(disputeCard).join("")+reps.map(deliveryCard).join("")+(disputes.length||reps.length?"":txs.map(txCard).join(""));
+  html+=ruleIds.slice(0,2).map(id=>`<div class="rule" dir="ltr"><div class="rh">${t("rule")} · ${esc(SEC[id].title)}</div><div class="rb">${esc(fmtBlock(SEC[id].text))}</div><button type="button" data-more>${t("more")}</button></div>`).join("");
+  if(ticket) html+=ticketCard(ticket);
+  const chips=[...new Set(cites)].map(id=>[id,srcLabel(id)]).filter(([,l])=>l);
+  if(chips.length) html+=`<div class="srcs">${chips.map(([id,l])=>`<button class="src" type="button" data-src="${esc(id)}" dir="auto">${esc(l)}</button>`).join("")}</div>`;
+  const soft=!["answered","routed"].includes(r.decision);
+  const d=addBot(html,soft?"notice":"");
+  d.querySelector(".bubble").setAttribute("dir",r.lang==="ar"?"rtl":"auto");
+  const foot=document.createElement("div"); foot.className="foot";
+  foot.innerHTML=(soft?`<span class="lbl"></span><button class="btn" type="button" data-agent>${t("agentBtn")}</button>`
+    :`<span class="lbl">${t("helpful")}</span><button class="thumb" type="button" aria-label="Helpful" aria-pressed="false" data-fb="up">👍</button><button class="thumb" type="button" aria-label="Not helpful" aria-pressed="false" data-fb="down">👎</button>`);
+  d.append(foot);
+  d.querySelectorAll("[data-more]").forEach(b=>{ const box=b.parentElement, rb=box.querySelector(".rb");
+    requestAnimationFrame(()=>{ if(rb.scrollHeight<=rb.clientHeight+2) b.hidden=true; });
+    b.onclick=()=>{box.classList.toggle("open");b.textContent=box.classList.contains("open")?t("less"):t("more");}; });
+  d.querySelectorAll("[data-src]").forEach(b=>b.onclick=()=>srcSheet(b.dataset.src));
+  d.querySelectorAll("[data-open-cards]").forEach(b=>b.onclick=()=>{tab="cards";renderApp();closeChat();});
+  d.querySelectorAll("[data-fb]").forEach(b=>b.onclick=()=>{ foot.querySelectorAll("[data-fb]").forEach(x=>x.setAttribute("aria-pressed",x===b)); feedback.push({q:r.qMasked,decision:r.decision,vote:b.dataset.fb}); toast(t("thanks")); });
+  const ag=d.querySelector("[data-agent]"); if(ag) ag.onclick=()=>agentFlow(r);
+  transcript.push({who:"copilot",text:r.answer,citations:cites});
+  scrollEnd();
+}
+
+/* ---------- Sending ---------- */
+async function send(display,query){
+  if(busy||!display.trim()) return;
+  if(!navigator.onLine){ toast(t("offline")); return; }
+  busy=true; updateSend();
+  const shown=maskPII(display).text;   // the masked text is what's shown, logged and sent
+  let q=query||shown;
+  const about=ctx?ctxLabel():null;
+  if(!query&&ctx&&ctx.kind==="tx"){ const x=ctx.tx; q=`${shown} (${Math.abs(x.amount_egp).toFixed(2)} on ${x.date})`; }
+  addUser(shown,query?null:about);
+  const wait=typing(); lastTicket=null;
+  try{
+    const [r]=await Promise.all([ask(q),new Promise(res=>setTimeout(res,650))]);
+    wait.remove(); renderAnswer(r,lastTicket);
+  }catch(e){
+    wait.remove();
+    const d=addBot(`<p>${esc(t("error"))}</p><button class="btn" type="button">${t("retry")}</button>`,"notice");
+    d.querySelector("button").onclick=()=>{d.remove();busy=false;send(display,query);};
+  }finally{ busy=false; updateSend(); }
+}
+
+/* Report a payment: confirm first, then the same guarded pipeline files the request */
+function reportFlow(){
+  const x=ctx&&ctx.tx; if(!x) return;
+  openSheet(`<h3>${t("reportQ")}</h3><div class="meta" dir="auto">${esc(x.merchant)} · ${money(x.amount_egp,true)} · ${dayY(x.date)}</div><p>${t("reportBody")}</p>
+    <div class="btnrow"><button class="btn primary" type="button" id="rYes">${t("send")}</button><button class="btn" type="button" id="rNo">${t("cancel")}</button></div>`,
+    b=>{ b.querySelector("#rNo").onclick=closeSheet;
+      b.querySelector("#rYes").onclick=()=>{closeSheet(); send(appLang==="ar"?"مش عارف الدفع ده":"I don’t recognise this payment",`I don't recognise the “${x.merchant}” payment of ${Math.abs(x.amount_egp).toFixed(2)} on ${x.date}`);}; });
+}
+
+/* Agent handoff */
+function agentFlow(r){
+  if(agentTicket){ toast(`${t("request")} ${agentTicket.id} · ${t("waiting")}`); return; }
+  openSheet(`<h3>${t("agentQ")}</h3><p>${t("agentBody")}</p><div class="btnrow"><button class="btn primary" type="button" id="aYes">${t("connect")}</button><button class="btn" type="button" id="aNo">${t("cancel")}</button></div>`,
+    b=>{ b.querySelector("#aNo").onclick=closeSheet;
+      b.querySelector("#aYes").onclick=()=>{ closeSheet();
+        agentTicket=createTicket("Agent handoff","Waiting for an agent",r?r.intent:"other",r?`Customer asked: “${r.qMasked}”.`:"Customer asked for an agent from the app.",r?r.citations:[]);
+        addBot(`<p>${esc(L(appLang,"I’ve passed this chat to a Nova agent with a summary and the sources, so you won’t have to repeat yourself.","بعت الشات لموظف من نوفا مع ملخص والمصادر، فمش هتحتاج تعيد الكلام."))}</p>${ticketCard(agentTicket)}`);
+        renderAgentBanner(); }; });
+}
+function renderAgentBanner(){
+  $("#agentBanner").hidden=!agentTicket;
+  if(agentTicket) $("#agentBanner").innerHTML=`<span aria-hidden="true">🎧</span><span><b>${t("request")} ${agentTicket.id} · ${t("waiting")}</b><br>${t("notify")}</span>`;
+}
+$("#agentBtn").onclick=()=>agentFlow(null);
+
+/* ---------- Composer: autogrow, PII warning, send ---------- */
+const qEl=$("#q");
+const PII_HARD=/\b(pin|otp|cvv|cvc|password|passcode)\b|الرقم السري|كلمة السر|باسورد|كود التفعيل/i;
+function updateSend(){ $("#sendBtn").disabled=busy||!qEl.value.trim()||!navigator.onLine; }
+qEl.addEventListener("input",()=>{
+  qEl.style.height="auto"; qEl.style.height=Math.min(qEl.scrollHeight,120)+"px";
+  const longNum=/(?:\d[ -]?){12,19}/.test(qEl.value), hard=PII_HARD.test(qEl.value)&&/\d{3,}/.test(qEl.value);
+  $("#pii").hidden=!(longNum||hard); if(longNum||hard) $("#pii").textContent=hard?t("piiHard"):t("pii");
+  updateSend();
+});
+qEl.addEventListener("keydown",e=>{ if(e.key==="Enter"&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); $("#form").requestSubmit(); } });
+$("#form").onsubmit=e=>{ e.preventDefault(); const v=qEl.value; qEl.value=""; qEl.style.height="auto"; $("#pii").hidden=true; updateSend(); send(v); };
+
+/* Offline */
+function netState(){ $("#offline").hidden=navigator.onLine; $("#offline").textContent=t("offline"); updateSend(); }
+addEventListener("online",netState); addEventListener("offline",netState);
+
+/* Keep the composer above the on-screen keyboard when full screen */
+if(window.visualViewport){ const vv=window.visualViewport;
+  const fit=()=>{ const full=matchMedia("(max-width:600px)").matches||document.body.classList.contains("embed"); screenEl.parentElement.style.height=full?vv.height+"px":""; };
+  vv.addEventListener("resize",fit); fit(); }
+
+/* ---------- Language, theme, session ---------- */
+function applyLang(){
+  screenEl.setAttribute("dir",appLang==="ar"?"rtl":"ltr"); screenEl.setAttribute("lang",appLang);
+  $("#chatTitle").textContent=t("title"); $("#chatSub").textContent=t("sub");
+  qEl.placeholder=t("placeholder"); qEl.setAttribute("aria-label",t("placeholder"));
+  $("#disclaim").textContent=t("disclaim");
+  $("#back").setAttribute("aria-label",appLang==="ar"?"رجوع":"Back"); $("#agentBtn").setAttribute("aria-label",t("agentQ"));
+  $("#sendBtn").setAttribute("aria-label",appLang==="ar"?"إرسال":"Send"); $("#ctxX").setAttribute("aria-label",appLang==="ar"?"إزالة":"Remove");
+  $("#langSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.l===appLang));
+  renderApp(); renderCtx(); renderChips(); renderAgentBanner(); netState();
+}
+$("#langSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{appLang=b.dataset.l;applyLang();});
+let theme="auto";
+function applyTheme(){ if(theme==="auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme",theme);
+  $("#themeSeg").querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.t===theme)); }
+$("#themeSeg").querySelectorAll("button").forEach(b=>b.onclick=()=>{theme=b.dataset.t;applyTheme();});
+
+function signIn(id){
+  session=CUST[id]; appLang=session.language==="ar"?"ar":"en";
+  msgsEl.innerHTML=""; transcript=[]; chatStarted=false; usedChips.clear(); ctx=null; agentTicket=null; tab="home";
+  closeChat(); applyLang();
+}
+$("#cust").innerHTML=CUSTOMERS.map(c=>`<option value="${c.id}">${c.id} · ${esc(c.name)}${c.business_name?` (${esc(c.business_name)})`:""} · ${c.plan}${c.language==="ar"?" · عربي":""}</option>`).join("");
+$("#cust").onchange=e=>signIn(e.target.value);
+$("#signout").onclick=()=>{ signIn(session.id); toast(appLang==="ar"?"اتمسح الشات":"Chat cleared on sign-out"); };
+
+if(new URLSearchParams(location.search).has("embed")) document.body.classList.add("embed");
+$("#chat").setAttribute("aria-hidden","true");
+applyTheme(); signIn(CUSTOMERS[0].id);
+
+/* ---------- AI availability (works inside claude.ai only) ---------- */
+(async()=>{ try{ if(window.claude&&window.claude.use){ sampleFn=await window.claude.use("sample"); } }catch(e){ sampleFn=null; } setAI(sampleFn?"on":"off"); })();
+setTimeout(()=>{ if(aiState==="checking") setAI("off"); },11000);
+</script>
+</body>
+</html>

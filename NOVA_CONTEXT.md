@@ -39,7 +39,7 @@ Folder: https://drive.google.com/drive/folders/1hSxTuiKaUBGgxWjpwZoRjvU9bVS-JCgr
 | Nova Assist – Demo Day.pptx | Demo Day deck: the 10-step build story | https://drive.google.com/file/d/1l1WNyGSU5QwNaPv3mrCLJRrWXyb8OtIg/view |
 
 ### claude.ai artifact
-- **Nova Copilot MVP** (updated 18 Nov): https://claude.ai/artifact/KLEvX9W63sTBJhDbXZKcdz. This is the same app as `index.html` in this repo.
+- **Nova Copilot MVP** (updated 26 Nov): https://claude.ai/artifact/KLEvX9W63sTBJhDbXZKcdz. This is the same app as `index.html` in this repo.
 
 ### Claude Code session
 - "Nova-copilot GitHub deployment" (in `C:\Users\Youssef Rashidy\mvp-proto`): pushed this code to GitHub and ran it on localhost for the demo.
@@ -58,4 +58,4 @@ Folder: https://drive.google.com/drive/folders/1hSxTuiKaUBGgxWjpwZoRjvU9bVS-JCgr
 - Eval: 120 cases in 6 categories (happy path, Arabic, injection, leakage, money/credit, unanswerable), 14 checkpoints, 7 eval rounds
 
 ## This repo's MVP
-`index.html` runs on the team's dataset (50 customers, POL-01 to POL-20) via `nova-data.js`, and its Evals tab runs the team's 120 golden cases. It has Chat, Evals, Agent queue, Audit log and Data tabs. AI answers work only inside claude.ai; locally it falls back to rule-based answers. The published claude.ai artifact still has the older 3-customer version.
+`index.html` runs on the team's dataset (50 customers, POL-01 to POL-20) via `nova-data.js`, and its Evals tab runs the team's 120 golden cases. It has Chat, Evals, Agent queue, Audit log and Data tabs. `mobile.html` is a prototype of the customer chat embedded in the Nova Bank mobile app, using the same pipeline (`nova-core.js`). AI answers work only inside claude.ai; locally it falls back to rule-based answers. The claude.ai artifact was updated to this version on 26 Nov 2026.
